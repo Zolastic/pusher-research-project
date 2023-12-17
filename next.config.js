@@ -5,6 +5,10 @@
 await import("./src/env.js");
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  publicRuntimeConfig: {
+    CLIENT_PUSHER_KEY: process.env.PUSHER_KEY,
+  },
+};
 
 export default config;
