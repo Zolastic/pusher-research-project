@@ -1,6 +1,5 @@
 import PusherServer from "pusher";
 import PusherClient from "pusher-js";
-import { env } from "~/env";
 
 export const pusherServer = new PusherServer({
   appId: process.env.PUSHER_APP_ID!,
