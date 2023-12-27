@@ -12,7 +12,7 @@ export const questionRouter = createTRPCRouter({
     return ctx.db.question.findMany();
   }),
 
-  updateResponse: protectedProcedure
+  updateResponse: publicProcedure
     .input(
       z.object({
         id: z.string(),
