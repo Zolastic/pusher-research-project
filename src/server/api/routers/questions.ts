@@ -3,7 +3,7 @@ import { pusherServer } from "~/lib/pusher";
 
 import {
   createTRPCRouter,
-  protectedProcedure,
+  // protectedProcedure,
   publicProcedure,
 } from "~/server/api/trpc";
 
