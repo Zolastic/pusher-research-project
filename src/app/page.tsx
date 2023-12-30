@@ -1,9 +1,5 @@
 import Link from "next/link";
-
-import { CreatePost } from "~/app/_components/create-post";
 import { Button } from "~/components/ui/button";
-import { getServerAuthSession } from "~/server/auth";
-import { api } from "~/trpc/server";
 
 export default async function Home() {
   return (
@@ -23,7 +19,7 @@ export default async function Home() {
           <p className="mt-4 text-center">
             This is a showcase of tRPC with Next.js, Prisma and Pusher.
           </p>
-          <Link href={`/demo`} className="mt-5">
+          <Link href={`/part1`} className="mt-5">
             <Button variant={"link"} className="bg-[#300D4F] text-muted">
               Demo
             </Button>
