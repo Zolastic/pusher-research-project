@@ -8,9 +8,21 @@ import {
 } from "~/server/api/trpc";
 
 export const questionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.db.question.findMany();
-  }),
+  getAll: publicProcedure
+    .input(
+      z.object({
+        part: z.string()
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.db.question.findMany({
+        where: {
+          part: {
+            startsWith: input.part,
+          },
+        },
+      });
+    }),
 
   updateResponse: publicProcedure
     .input(

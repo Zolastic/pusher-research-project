@@ -6,7 +6,7 @@ import { Button } from "~/components/ui/button";
 import { ChevronRight } from "lucide-react";
 
 const page = async () => {
-  const questions = await api.question.getAll.query();
+  const questions = await api.question.getAll.query({ part: "1" });
 
   return (
     <>

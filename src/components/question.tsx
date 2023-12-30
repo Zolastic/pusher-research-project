@@ -13,7 +13,7 @@ type Props = {
 };
 
 const Question = ({ question, part }: Props) => {
-  const [response, setResponse] = useState<string>("");
+  const [response, setResponse] = useState<string>(question.response);
   const debouncedResponse = useDebounce(response, 1000);
   const updateResponse = api.question.updateResponse.useMutation();
 
