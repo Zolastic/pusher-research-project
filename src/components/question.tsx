@@ -3,7 +3,6 @@
 import type { Question } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import { useDebounce } from "@uidotdev/usehooks";
-import { Input } from "./ui/input";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
@@ -19,7 +18,7 @@ const Question = ({ question }: Props) => {
 
   useEffect(() => {
     const updateResponseToDb = async () => {
-      if (debouncedResponse) {
+      if (debouncedResponse !== undefined && debouncedResponse !== null) {
         await updateResponse
           .mutateAsync({
             id: question.id,
@@ -65,6 +64,7 @@ const Question = ({ question }: Props) => {
           <Textarea
             value={response}
             onChange={(e) => {
+              console.log("question response changed", e.target.value);
               setResponse(e.target.value);
             }}
           />
