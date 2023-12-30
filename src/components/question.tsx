@@ -6,6 +6,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { Input } from "./ui/input";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
+import { Textarea } from "./ui/textarea";
 
 type Props = {
   question: Question;
@@ -61,7 +62,7 @@ const Question = ({ question }: Props) => {
           <span className="text-lg">{question.question}</span>
         </label>
         <div className="mt-2 flex h-[100px] w-[500px]">
-          <Input
+          <Textarea
             value={response}
             onChange={(e) => {
               setResponse(e.target.value);
