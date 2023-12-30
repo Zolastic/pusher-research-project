@@ -17,12 +17,13 @@ export const questionRouter = createTRPCRouter({
       z.object({
         id: z.string(),
         response: z.string(),
+        part: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, response } = input;
+      const { id, response, part } = input;
 
-      await pusherServer.trigger("pusherResearchProject", "incoming-message", {
+      await pusherServer.trigger(part, "incoming-message", {
         id,
         response,
       });

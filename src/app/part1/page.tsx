@@ -12,7 +12,7 @@ const page = async () => {
     <>
       <main className="flex min-h-screen flex-col items-center bg-slate-100 px-4">
         {questions.map((question) => (
-          <Question key={question.id} question={question} />
+          <Question key={question.id} question={question} part="part1" />
         ))}
         <div>
           <Link href={`/part2`} className="mt-5">
