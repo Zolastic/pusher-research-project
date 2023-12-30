@@ -9,9 +9,10 @@ import { Textarea } from "./ui/textarea";
 
 type Props = {
   question: Question;
+  part: string;
 };
 
-const Question = ({ question }: Props) => {
+const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
   const debouncedResponse = useDebounce(response, 1000);
   const updateResponse = api.question.updateResponse.useMutation();
@@ -23,6 +24,7 @@ const Question = ({ question }: Props) => {
           .mutateAsync({
             id: question.id,
             response: debouncedResponse,
+            part,
           })
           .catch((error) => {
             console.error("Error updating response:", error);
@@ -38,7 +40,7 @@ const Question = ({ question }: Props) => {
   }, [question]);
 
   useEffect(() => {
-    pusherClient.subscribe("pusherResearchProject");
+    pusherClient.subscribe(part);
 
     pusherClient.bind("incoming-message", (data: Question) => {
       if (data.id === question.id) {
