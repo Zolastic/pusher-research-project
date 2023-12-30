@@ -2,6 +2,7 @@
 
 import type { Question } from "@prisma/client";
 import React, { useEffect, useState } from "react";
+import { useDebounce } from "@uidotdev/usehooks";
 import { Input } from "./ui/input";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
@@ -12,12 +13,25 @@ type Props = {
 
 const Question = ({ question }: Props) => {
   const [response, setResponse] = useState<string>("");
-  const { mutate: updateResponse } = api.question.updateResponse.useMutation();
+  const debouncedResponse = useDebounce(response, 1000);
+  const updateResponse = api.question.updateResponse.useMutation();
 
-  const handleResponseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setResponse(e.target.value);
-    updateResponse({ id: question.id, response: e.target.value });
-  };
+  useEffect(() => {
+    const updateResponseToDb = async () => {
+      if (debouncedResponse) {
+        await updateResponse
+          .mutateAsync({
+            id: question.id,
+            response: debouncedResponse,
+          })
+          .catch((error) => {
+            console.error("Error updating response:", error);
+          });
+      }
+    };
+
+    void updateResponseToDb();
+  }, [debouncedResponse]);
 
   useEffect(() => {
     setResponse(question.response);
@@ -47,7 +61,12 @@ const Question = ({ question }: Props) => {
           <span className="text-lg">{question.question}</span>
         </label>
         <div className="mt-2 flex h-[100px] w-[500px]">
-          <Input value={response} onChange={handleResponseChange} />
+          <Input
+            value={response}
+            onChange={(e) => {
+              setResponse(e.target.value);
+            }}
+          />
         </div>
       </div>
     </>
