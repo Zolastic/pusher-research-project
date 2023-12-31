@@ -36,10 +36,6 @@ const Question = ({ question, part }: Props) => {
   }, [debouncedResponse]);
 
   useEffect(() => {
-    setResponse(question.response);
-  }, [question]);
-
-  useEffect(() => {
     pusherClient.subscribe(part);
 
     pusherClient.bind("incoming-message", (data: Question) => {
