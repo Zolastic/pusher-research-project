@@ -6,7 +6,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
-import { LoadingPage, LoadingSpinner } from "./loading";
+import { LoadingSpinner } from "./loading";
 
 type Props = {
   question: Question;
