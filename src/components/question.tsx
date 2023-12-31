@@ -6,6 +6,7 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
+import { LoadingPage, LoadingSpinner } from "./loading";
 
 type Props = {
   question: Question;
@@ -14,12 +15,22 @@ type Props = {
 
 const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(true);
   const debouncedResponse = useDebounce(response, 1000);
   const updateResponse = api.question.updateResponse.useMutation();
 
   useEffect(() => {
+    setResponse(question.response);
+    setIsLoading(false);
+  }, [question]);
+
+  useEffect(() => {
     const updateResponseToDb = async () => {
-      if (debouncedResponse !== undefined && debouncedResponse !== null) {
+      if (
+        !isLoading &&
+        debouncedResponse !== undefined &&
+        debouncedResponse !== null
+      ) {
         await updateResponse
           .mutateAsync({
             id: question.id,
@@ -36,10 +47,6 @@ const Question = ({ question, part }: Props) => {
   }, [debouncedResponse]);
 
   useEffect(() => {
-    setResponse(question.response);
-  }, [question]);
-
-  useEffect(() => {
     pusherClient.subscribe(part);
 
     pusherClient.bind("incoming-message", (data: Question) => {
@@ -52,6 +59,13 @@ const Question = ({ question, part }: Props) => {
       pusherClient.unsubscribe(part);
     };
   }, []);
+
+  if (isLoading)
+    return (
+      <div className="my-[100px]">
+        <LoadingSpinner />
+      </div>
+    );
 
   return (
     <>
