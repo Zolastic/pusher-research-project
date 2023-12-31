@@ -49,7 +49,7 @@ const Question = ({ question, part }: Props) => {
     });
 
     return () => {
-      pusherClient.unsubscribe("pusherResearchProject");
+      pusherClient.unsubscribe(part);
     };
   }, []);
 
