@@ -14,29 +14,7 @@ const page = async () => {
     redirect("api/auth/signin");
   }  
 
-  const questions = await api.question.getAll.query({ part: "2" });
-
-  // group questions by major part e.g. 2.1, 2.2
-  const groupedQuestions = questions.reduce((acc: any, question) => {
-    const majorPart = question.part.split('.').slice(0, 2).join('.');
-
-    // check if an array for the major part exists yet e.g. if there is no array for questions in 2.2, create one
-    if (!acc[majorPart]) {
-      acc[majorPart] = [];
-    }
-
-    // push the questions to the corresponding array
-    acc[majorPart].push(question);
-    return acc;
-  }, {});
-
-  // sort questions within each group
-  for (const majorPart in groupedQuestions) {
-    groupedQuestions[majorPart].sort((a: any, b: any) => a.part.localeCompare(b.part));
-  }
-
-  // convert groupedQuestions from an object into an array so that the .map function can be used
-  const sortedQuestions = Object.values(groupedQuestions);
+  const sortedQuestions = await api.question.getAll.query({ part: "2" });
 
   return (
     <>
