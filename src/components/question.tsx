@@ -2,29 +2,52 @@
 
 import type { Question } from "@prisma/client";
 import React, { useEffect, useState } from "react";
-import { Input } from "./ui/input";
+import { useDebounce } from "@uidotdev/usehooks";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
+import { Textarea } from "./ui/textarea";
+import { LoadingSpinner } from "./loading";
 
 type Props = {
   question: Question;
+  part: string;
 };
 
-const Question = ({ question }: Props) => {
+const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
-  const { mutate: updateResponse } = api.question.updateResponse.useMutation();
-
-  const handleResponseChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setResponse(e.target.value);
-    updateResponse({ id: question.id, response: e.target.value });
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const debouncedResponse = useDebounce(response, 1000);
+  const updateResponse = api.question.updateResponse.useMutation();
 
   useEffect(() => {
     setResponse(question.response);
+    setIsLoading(false);
   }, [question]);
 
   useEffect(() => {
-    pusherClient.subscribe("pusherResearchProject");
+    const updateResponseToDb = async () => {
+      if (
+        !isLoading &&
+        debouncedResponse !== undefined &&
+        debouncedResponse !== null
+      ) {
+        await updateResponse
+          .mutateAsync({
+            id: question.id,
+            response: debouncedResponse,
+            part,
+          })
+          .catch((error) => {
+            console.error("Error updating response:", error);
+          });
+      }
+    };
+
+    void updateResponseToDb();
+  }, [debouncedResponse]);
+
+  useEffect(() => {
+    pusherClient.subscribe(part);
 
     pusherClient.bind("incoming-message", (data: Question) => {
       if (data.id === question.id) {
@@ -33,9 +56,16 @@ const Question = ({ question }: Props) => {
     });
 
     return () => {
-      pusherClient.unsubscribe("pusherResearchProject");
+      pusherClient.unsubscribe(part);
     };
   }, []);
+
+  if (isLoading)
+    return (
+      <div className="my-[100px]">
+        <LoadingSpinner />
+      </div>
+    );
 
   return (
     <>
@@ -47,7 +77,13 @@ const Question = ({ question }: Props) => {
           <span className="text-lg">{question.question}</span>
         </label>
         <div className="mt-2 flex h-[100px] w-[500px]">
-          <Input value={response} onChange={handleResponseChange} />
+          <Textarea
+            value={response}
+            onChange={(e) => {
+              console.log("question response changed", e.target.value);
+              setResponse(e.target.value);
+            }}
+          />
         </div>
       </div>
     </>
