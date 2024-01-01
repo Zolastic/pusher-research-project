@@ -14,12 +14,12 @@ const page = async () => {
     redirect("api/auth/signin");
   }  
 
-  const sortedQuestions = await api.question.getAll.query({ part: "1" });
+  const questions = await api.question.getAll.query({ part: "1" });
 
   return (
     <>
       <main className="flex min-h-screen flex-col items-center bg-slate-100 px-4">
-        {sortedQuestions.map((part: any) => (
+        {questions.map((part: any) => (
           <div key={part} className="flex flex-col items-center m-4 bg-slate-200 rounded">
             {part.map((question: Question) => (
               <Question key={question.id} question={question} part="part2" />
