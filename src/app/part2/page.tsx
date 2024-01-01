@@ -4,8 +4,16 @@ import Question from "~/components/question";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
+import { authOptions } from "~/server/auth";
 
 const page = async () => {
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    redirect("api/auth/signin");
+  }  
+
   const questions = await api.question.getAll.query({ part: "2" });
 
   // group questions by major part e.g. 2.1, 2.2
