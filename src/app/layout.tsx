@@ -4,7 +4,7 @@ import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 
 import { TRPCReactProvider } from "~/trpc/react";
-import SessionProvider from "~/components/sessionProvider";
+import SessionProvider from "~/context/sessionProvider";
 import Navbar from "~/components/navbar";
 
 const inter = Inter({
