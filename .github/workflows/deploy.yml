@@ -39,4 +39,4 @@ jobs:
 
         run: |
           npx prisma generate
-          npx sst deploy --stage prod
+          npx sst deploy --stage testing
