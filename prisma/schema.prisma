@@ -86,6 +86,7 @@ model Question {
     question String
     part     String
     response String
+    done     Boolean @default(false)
 
     updates Update[]
 }

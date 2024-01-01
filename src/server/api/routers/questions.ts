@@ -8,9 +8,21 @@ import {
 } from "~/server/api/trpc";
 
 export const questionRouter = createTRPCRouter({
-  getAll: publicProcedure.query(({ ctx }) => {
-    return ctx.db.question.findMany();
-  }),
+  getAll: publicProcedure
+    .input(
+      z.object({
+        part: z.string()
+      })
+    )
+    .query(({ ctx, input }) => {
+      return ctx.db.question.findMany({
+        where: {
+          part: {
+            startsWith: input.part,
+          },
+        },
+      });
+    }),
 
   updateResponse: publicProcedure
     .input(
@@ -34,4 +46,27 @@ export const questionRouter = createTRPCRouter({
       });
       return question;
     }),
+
+  updateDone: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        done: z.boolean(),
+        part: z.string()
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, done, part } = input;
+
+      await pusherServer.trigger(part, "incoming-message", {
+        id,
+        done
+      }); 
+
+      const question = await ctx.db.question.update({
+        where: { id },
+        data: { done },
+      });
+      return question;
+    })
 });
