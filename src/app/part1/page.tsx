@@ -4,15 +4,27 @@ import Question from "~/components/question";
 import { api } from "~/trpc/server";
 import { Button } from "~/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "~/server/auth";
+import { redirect } from "next/navigation";
 
 const page = async () => {
-  const questions = await api.question.getAll.query({ part: "1" });
+  const session = await getServerSession(authOptions)
+  if (!session) {
+    redirect("api/auth/signin");
+  }  
+
+  const questions = await api.question.getAll.query({ partOrder: 1 });
 
   return (
     <>
       <main className="flex min-h-screen flex-col items-center bg-slate-100 px-4">
-        {questions.map((question) => (
-          <Question key={question.id} question={question} part="part1" />
+        {questions.map((part: any) => (
+          <div key={part} className="flex flex-col items-center m-4 bg-slate-200 rounded">
+            {part.map((question: Question) => (
+              <Question key={question.id} question={question} part="part2" />
+            ))}
+          </div>
         ))}
         <div>
           <Link href={`/part2`} className="mt-5">

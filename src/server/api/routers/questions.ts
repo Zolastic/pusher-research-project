@@ -11,17 +11,38 @@ export const questionRouter = createTRPCRouter({
   getAll: publicProcedure
     .input(
       z.object({
-        part: z.string()
+        partOrder: z.number()
       })
     )
-    .query(({ ctx, input }) => {
-      return ctx.db.question.findMany({
+    .query(async ({ ctx, input }) => {
+      const part = await ctx.db.part.findFirst({
         where: {
-          part: {
-            startsWith: input.part,
-          },
-        },
-      });
+          order: input.partOrder
+        }
+      })
+
+      if (!part) throw new Error("Part not found")
+
+      const sections = await ctx.db.section.findMany({
+      where: {
+          partId: part.id
+        }
+      })
+
+      if (!sections) throw new Error("Section not found")
+
+      const partQuestions = await Promise.all(
+        sections.map(async (section) => {
+          const sectionQuestions = await ctx.db.question.findMany({
+            where: {
+              sectionId: section.id
+            }
+          });
+          return sectionQuestions;
+        })        
+      )
+      
+      return partQuestions;
     }),
 
     updateResponse: publicProcedure

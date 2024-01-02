@@ -59,7 +59,8 @@ model User {
     sessions      Session[]
     posts         Post[]
 
-    updates Update[]
+    userSections UserSection[]
+    updates      Update[]
 }
 
 model VerificationToken {
@@ -68,6 +69,43 @@ model VerificationToken {
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model UserSection {
+    id        String  @id @default(cuid())
+    user      User    @relation(fields: [userId], references: [id])
+    userId    String
+    section   Section @relation(fields: [sectionId], references: [id])
+    sectionId String
+}
+
+model Part {
+    id       String    @id @default(cuid())
+    order    Int
+    name     String
+    sections Section[]
+}
+
+model Section {
+    id           String        @id @default(cuid())
+    order        Int
+    name         String
+    part         Part          @relation(fields: [partId], references: [id])
+    partId       String
+    userSections UserSection[]
+    questions    Question[]
+}
+
+model Question {
+    id        String  @id @default(cuid())
+    order     Int
+    question  String
+    response  String
+    done      Boolean @default(false)
+    section   Section @relation(fields: [sectionId], references: [id])
+    sectionId String
+
+    updates Update[]
 }
 
 model Update {

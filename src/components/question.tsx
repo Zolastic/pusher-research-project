@@ -53,17 +53,21 @@ const Question = ({ question, part }: Props) => {
   }, [debouncedResponse]);
 
   useEffect(() => {
-    pusherClient.subscribe(part);
+    pusherClient.subscribe(`presence-${part}`);
+    // pusherClient.subscribe(part);
 
     pusherClient.bind("incoming-message", (data: Question) => {
       if (data.id === question.id) {
         setResponse(data.response);
         setIsEditing(data.editing); // Update the editing status based on incoming events
       }
+      const socketId = pusherClient.connection.socket_id;
+      console.log("Socket ID:", socketId);
     });
 
     return () => {
-      pusherClient.unsubscribe(part);
+      pusherClient.unsubscribe(`presence-${part}`);
+      // pusherClient.unsubscribe(part);
     };
   }, [question]); // Update the UI when the 'question' prop changes
 
@@ -76,12 +80,12 @@ const Question = ({ question, part }: Props) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center py-16">
+      <div className="flex flex-col items-center justify-center px-4 py-16">
         <label
           htmlFor="about"
           className="flex w-full space-x-2 text-base font-medium leading-6 text-gray-900"
         >
-          <span className="text-lg">{question.part}</span>
+          <span className="text-lg">{question.order}.</span>
           <span className="text-lg">{question.question}</span>
         </label>
         <div
