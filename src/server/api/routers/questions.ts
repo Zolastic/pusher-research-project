@@ -24,26 +24,31 @@ export const questionRouter = createTRPCRouter({
       });
     }),
 
-  updateResponse: publicProcedure
+    updateResponse: publicProcedure
     .input(
       z.object({
         id: z.string(),
         response: z.string(),
         part: z.string(),
+        editing: z.boolean(), // New input to indicate if the user is editing
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, response, part } = input;
+      const { id, response, part, editing } = input;
 
+      // Trigger Pusher event for real-time updates
       await pusherServer.trigger(part, "incoming-message", {
         id,
         response,
+        editing,
       });
 
+      // Update the database with the new response and editing status
       const question = await ctx.db.question.update({
         where: { id },
-        data: { response },
+        data: { response, editing },
       });
+
       return question;
     }),
 
