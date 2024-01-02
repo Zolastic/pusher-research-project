@@ -11,39 +11,38 @@ export const questionRouter = createTRPCRouter({
   getAll: publicProcedure
     .input(
       z.object({
-        part: z.string()
+        partOrder: z.number()
       })
     )
     .query(async ({ ctx, input }) => {
-      const questions = await ctx.db.question.findMany({
+      const part = await ctx.db.part.findFirst({
         where: {
-          part: {
-            startsWith: input.part,
-          },
-        },
-      });
-
-      // group questions by major part e.g. 2.1, 2.2
-      const groupedQuestions = questions.reduce((acc: any, question) => {
-        const majorPart = question.part.split('.').slice(0, 2).join('.');
-
-        // check if an array for the major part exists yet e.g. if there is no array for questions in 2.2, create one
-        if (!acc[majorPart]) {
-          acc[majorPart] = [];
+          order: input.partOrder
         }
+      })
 
-        // push the questions to the corresponding array
-        acc[majorPart].push(question);
-        return acc;
-      }, {});
+      if (!part) throw new Error("Part not found")
 
-      // sort questions within each group
-      for (const majorPart in groupedQuestions) {
-        groupedQuestions[majorPart].sort((a: any, b: any) => a.part.localeCompare(b.part));
-      }
+      const sections = await ctx.db.section.findMany({
+      where: {
+          partId: part.id
+        }
+      })
 
-      // convert groupedQuestions from an object into an array so that the .map function can be used
-      return Object.values(groupedQuestions);
+      if (!sections) throw new Error("Section not found")
+
+      const partQuestions = await Promise.all(
+        sections.map(async (section) => {
+          const sectionQuestions = await ctx.db.question.findMany({
+            where: {
+              sectionId: section.id
+            }
+          });
+          return sectionQuestions;
+        })        
+      )
+      
+      return partQuestions;
     }),
 
   updateResponse: publicProcedure

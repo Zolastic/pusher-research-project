@@ -14,7 +14,7 @@ const page = async () => {
     redirect("api/auth/signin");
   }  
 
-  const questions = await api.question.getAll.query({ part: "1" });
+  const questions = await api.question.getAll.query({ partOrder: 1 });
 
   return (
     <>
