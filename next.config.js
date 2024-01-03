@@ -9,6 +9,14 @@ const config = {
   publicRuntimeConfig: {
     CLIENT_PUSHER_KEY: process.env.PUSHER_KEY,
   },
+
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 export default config;

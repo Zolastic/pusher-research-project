@@ -69,29 +69,26 @@ const Question = ({ question, part }: Props) => {
     );
 
   return (
-    <>
-      <div className="flex flex-col items-center justify-center py-16">
-        <label
-          htmlFor="about"
-          className="flex w-full space-x-2 text-base font-medium leading-6 text-gray-900"
-        >
-          <span className="text-lg">{question.part}</span>
-          <span className="text-lg">{question.question}</span>
-        </label>
-        <div className="mt-2 flex h-[100px] w-[500px] flex-col">
-          <Textarea
-            value={response}
-            onChange={(e) => {
-              console.log("question response changed", e.target.value);
-              setResponse(e.target.value);
-            }}
-          />
-          <div className="ml-auto flex">
-            <Done id={question.id} checked={question.done} part={part} />
-          </div>
+    <div className="flex flex-col items-center justify-center py-16">
+      <label
+        htmlFor="about"
+        className="flex w-full space-x-2 text-base font-medium leading-6 text-gray-900"
+      >
+        <span className="text-lg">{question.part}</span>
+        <span className="text-lg">{question.question}</span>
+      </label>
+      <div className="mt-2 flex h-[100px] w-[500px] flex-col">
+        <Textarea
+          value={response}
+          onChange={(e) => {
+            setResponse(e.target.value);
+          }}
+        />
+        <div className="ml-auto flex">
+          <Done id={question.id} checked={question.done} part={part} />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
