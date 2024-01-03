@@ -118,15 +118,3 @@ model Update {
     user     User     @relation(fields: [userId], references: [id])
     question Question @relation(fields: [questionId], references: [id])
 }
-
-model Question {
-    id       String  @id @default(cuid())
-    question String
-    part     String
-    response String
-    done     Boolean @default(false)
-    editor   String? // Unique identifier for the current editor (e.g., session ID)
-    editing  Boolean @default(false) // Indicates whether the question is currently being edited
-
-    updates Update[]
-}

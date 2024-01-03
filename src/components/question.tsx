@@ -8,8 +8,7 @@ import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
 import { LoadingPage, LoadingSpinner } from "./loading";
 import Done from "~/components/done";
-
-// ... (existing imports)
+import { getSession } from "next-auth/react";
 
 type Props = {
   question: Question;
@@ -19,16 +18,21 @@ type Props = {
 const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false); // New state to track editing status
+  const [isEditing, setIsEditing] = useState(false);
+  const [userID, setUserID] = useState<string | null>(null);
   const debouncedResponse = useDebounce(response, 1000);
   const updateResponse = api.question.updateResponse.useMutation();
+  const sendIsEditing = api.question.sendIsEditing.useMutation();
 
   useEffect(() => {
-    setResponse(question.response);
-    setIsEditing(question.editing); // Initialize the editing status
-    setIsLoading(false);
+    const fetchSession = async () => {
+      const session = await getSession();
+      setUserID(session?.user?.id ?? null);
+      setResponse(question.response);
+      setIsLoading(false);
+    };
+    fetchSession();
   }, [question]);
-
   useEffect(() => {
     const updateResponseToDb = async () => {
       if (
@@ -41,7 +45,6 @@ const Question = ({ question, part }: Props) => {
             id: question.id,
             response: debouncedResponse,
             part,
-            editing: true,
           })
           .catch((error) => {
             console.error("Error updating response:", error);
@@ -53,24 +56,49 @@ const Question = ({ question, part }: Props) => {
   }, [debouncedResponse]);
 
   useEffect(() => {
-    pusherClient.subscribe(`presence-${part}`);
-    // pusherClient.subscribe(part);
+    pusherClient.subscribe(`presence${part}`);
 
     pusherClient.bind("incoming-message", (data: Question) => {
+      console.log("data received", data);
+
       if (data.id === question.id) {
         setResponse(data.response);
-        setIsEditing(data.editing); // Update the editing status based on incoming events
+        setIsEditing(data.editing);
       }
+
       const socketId = pusherClient.connection.socket_id;
       console.log("Socket ID:", socketId);
+      console.log(isEditing, userID, question.id);
     });
-
+    pusherClient.bind(
+      "isEditing",
+      (data: { questionId: string; isEditing: boolean }) => {
+        if (data.questionId == question.id) {
+          setIsEditing(data.isEditing);
+        }
+      },
+    );
     return () => {
-      pusherClient.unsubscribe(`presence-${part}`);
-      // pusherClient.unsubscribe(part);
+      setIsEditing(false);
+      pusherClient.unsubscribe(`presence${part}`);
     };
-  }, [question]); // Update the UI when the 'question' prop changes
+  }, [question]);
 
+  const handleFocus = async () => {
+    await sendIsEditing.mutateAsync({
+      part,
+      questionId: question.id,
+      isEditing: true,
+    });
+  };
+
+  const handleBlur = async () => {
+    await sendIsEditing.mutateAsync({
+      part,
+      questionId: question.id,
+      isEditing: true,
+    });
+  };
   if (isLoading)
     return (
       <div className="my-[100px]">
@@ -88,17 +116,17 @@ const Question = ({ question, part }: Props) => {
           <span className="text-lg">{question.order}.</span>
           <span className="text-lg">{question.question}</span>
         </label>
-        <div
-          className={`mt-2 flex h-[100px] w-[500px] flex-col ${
-            isEditing ? "bg-orange-100" : ""
-          }`}
-        >
+        <div className={`mt-2 flex h-[100px] w-[500px] flex-col `}>
           <Textarea
             value={response}
             onChange={(e) => {
               console.log("question response changed", e.target.value);
               setResponse(e.target.value);
+              setIsEditing(true);
             }}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            disabled={isEditing} // Disable if not the editor
           />
           <div className="ml-auto flex">
             <Done id={question.id} checked={question.done} part={part} />

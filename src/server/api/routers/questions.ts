@@ -51,28 +51,24 @@ export const questionRouter = createTRPCRouter({
         id: z.string(),
         response: z.string(),
         part: z.string(),
-        editing: z.boolean(), // New input to indicate if the user is editing
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, response, part, editing } = input;
+      const { id, response, part} = input;
 
       // Trigger Pusher event for real-time updates
-      await pusherServer.trigger(part, "incoming-message", {
-        id,
-        response,
-        editing,
-      });
+      // await pusherServer.trigger(`presence${part}` , "incoming-message", {
+      //   id,
+      //   response,
+      // });
 
-      // Update the database with the new response and editing status
       const question = await ctx.db.question.update({
         where: { id },
-        data: { response, editing },
+        data: { response},
       });
 
       return question;
     }),
-
   updateDone: publicProcedure
     .input(
       z.object({
@@ -84,15 +80,27 @@ export const questionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, done, part } = input;
 
-      await pusherServer.trigger(part, "incoming-message", {
-        id,
-        done
-      }); 
+      // await pusherServer.trigger(part, "incoming-message", {
+      //   id,
+      //   done
+      // }); 
 
       const question = await ctx.db.question.update({
         where: { id },
         data: { done },
       });
       return question;
-    })
+    }),
+
+    sendIsEditing: publicProcedure.input(z.object({part: z.string(), questionId: z.string(), isEditing: z.boolean()})).mutation(async ({ input }) => {
+
+      const {part, questionId, isEditing} = input;
+
+      await pusherServer.trigger(`presence${part}`, "isEditing", {
+        questionId,
+        isEditing,
+      });
+
+      return;
+    }),
 });
