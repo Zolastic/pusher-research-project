@@ -15,10 +15,17 @@ type Props = {
   part: string;
 };
 
+type isEditing = {
+  questionId: string;
+  isEditing: boolean;
+  userId: string;
+};
+
 const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingMessage, setIsEditingMessage] = useState<isEditing>();
   const [userID, setUserID] = useState<string | null>(null);
   const debouncedResponse = useDebounce(response, 1000);
   const updateResponse = api.question.updateResponse.useMutation();
@@ -28,6 +35,7 @@ const Question = ({ question, part }: Props) => {
     const fetchSession = async () => {
       const session = await getSession();
       setUserID(session?.user?.id ?? null);
+      console.log("userId", session?.user?.id ?? null);
       setResponse(question.response);
       setIsLoading(false);
     };
@@ -70,25 +78,29 @@ const Question = ({ question, part }: Props) => {
       console.log("Socket ID:", socketId);
       console.log(isEditing, userID, question.id);
     });
-    pusherClient.bind(
-      "isEditing",
-      (data: { questionId: string; isEditing: boolean }) => {
-        if (data.questionId == question.id) {
-          setIsEditing(data.isEditing);
-        }
-      },
-    );
+    pusherClient.bind("isEditing", (data: isEditing) => {
+      setIsEditingMessage(data);
+    });
     return () => {
       setIsEditing(false);
       pusherClient.unsubscribe(`presence${part}`);
     };
   }, [question]);
 
+  useEffect(() => {
+    if (isEditingMessage) {
+      if (isEditingMessage.questionId != question.id) return;
+      if (isEditingMessage.userId == userID) return;
+      setIsEditing(isEditingMessage.isEditing);
+    }
+  }, [isEditingMessage]);
+
   const handleFocus = async () => {
     await sendIsEditing.mutateAsync({
       part,
       questionId: question.id,
       isEditing: true,
+      userId: userID!,
     });
   };
 
@@ -96,7 +108,8 @@ const Question = ({ question, part }: Props) => {
     await sendIsEditing.mutateAsync({
       part,
       questionId: question.id,
-      isEditing: true,
+      isEditing: false,
+      userId: userID!,
     });
   };
   if (isLoading)

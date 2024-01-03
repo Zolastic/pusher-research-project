@@ -92,13 +92,14 @@ export const questionRouter = createTRPCRouter({
       return question;
     }),
 
-    sendIsEditing: publicProcedure.input(z.object({part: z.string(), questionId: z.string(), isEditing: z.boolean()})).mutation(async ({ input }) => {
+    sendIsEditing: publicProcedure.input(z.object({part: z.string(), questionId: z.string(), isEditing: z.boolean(),userId:z.string()})).mutation(async ({ input }) => {
 
-      const {part, questionId, isEditing} = input;
+      const {part, questionId, isEditing,userId} = input;
 
       await pusherServer.trigger(`presence${part}`, "isEditing", {
         questionId,
         isEditing,
+        userId,
       });
 
       return;
