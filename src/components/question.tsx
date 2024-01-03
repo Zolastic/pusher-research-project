@@ -6,13 +6,13 @@ import { useDebounce } from "@uidotdev/usehooks";
 import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
-import { LoadingPage, LoadingSpinner } from "./loading";
-import Done from "~/components/done"
+import { LoadingSpinner } from "./loading";
+import Done from "~/components/done";
 
 type Props = {
   question: Question;
   part: string;
-}; 
+};
 
 const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
@@ -70,7 +70,7 @@ const Question = ({ question, part }: Props) => {
 
   return (
     <>
-      <div className="py-16 flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center py-16">
         <label
           htmlFor="about"
           className="flex w-full space-x-2 text-base font-medium leading-6 text-gray-900"
@@ -78,7 +78,7 @@ const Question = ({ question, part }: Props) => {
           <span className="text-lg">{question.part}</span>
           <span className="text-lg">{question.question}</span>
         </label>
-        <div className="mt-2 flex flex-col h-[100px] w-[500px]">
+        <div className="mt-2 flex h-[100px] w-[500px] flex-col">
           <Textarea
             value={response}
             onChange={(e) => {
@@ -86,7 +86,7 @@ const Question = ({ question, part }: Props) => {
               setResponse(e.target.value);
             }}
           />
-          <div className="flex ml-auto">
+          <div className="ml-auto flex">
             <Done id={question.id} checked={question.done} part={part} />
           </div>
         </div>
