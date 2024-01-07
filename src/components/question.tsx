@@ -7,12 +7,12 @@ import { pusherClient } from "~/lib/pusher";
 import { api } from "~/trpc/react";
 import { Textarea } from "./ui/textarea";
 import { LoadingPage, LoadingSpinner } from "./loading";
-import Done from "~/components/done"
+import Done from "~/components/done";
 
 type Props = {
   question: Question;
   part: string;
-}; 
+};
 
 const Question = ({ question, part }: Props) => {
   const [response, setResponse] = useState<string>("");
@@ -48,20 +48,40 @@ const Question = ({ question, part }: Props) => {
   }, [debouncedResponse]);
 
   useEffect(() => {
-    pusherClient.subscribe(`presence-${part}`);
-    // pusherClient.subscribe(part);
+    // Subscribe to a presence channel
+    const channel = pusherClient.subscribe(`presence-${part}`);
 
-    pusherClient.bind("incoming-message", (data: Question) => {
+    // Bind to the necessary events
+    channel.bind("incoming-message", (data: Question) => {
+      console.log("Incoming message:", data);
       if (data.id === question.id) {
         setResponse(data.response);
       }
       const socketId = pusherClient.connection.socket_id;
-      console.log('Socket ID:', socketId);
+      console.log("Socket ID:", socketId);
+    });
+
+    // Presence channels also support 'pusher:subscription_succeeded' and 'pusher:member_added' events
+    channel.bind(
+      "pusher:subscription_succeeded",
+      function (members: { count: any; me: any }) {
+        console.log("Successfully subscribed!");
+        console.log("Number of members:", members.count);
+        console.log("Me:", members.me);
+      },
+    );
+
+    channel.bind("pusher:member_added", function (member: { id: any }) {
+      console.log("Member added:", member.id);
+    });
+
+    channel.bind("pusher:member_removed", function (member: { id: any }) {
+      console.log("Member removed:", member.id);
     });
 
     return () => {
+      // Unsubscribe from the presence channel when the component is unmounted
       pusherClient.unsubscribe(`presence-${part}`);
-      // pusherClient.unsubscribe(part);
     };
   }, []);
 
@@ -74,7 +94,7 @@ const Question = ({ question, part }: Props) => {
 
   return (
     <>
-      <div className="flex flex-col items-center justify-center py-16 px-4">
+      <div className="flex flex-col items-center justify-center px-4 py-16">
         <label
           htmlFor="about"
           className="flex w-full space-x-2 text-base font-medium leading-6 text-gray-900"
@@ -82,7 +102,7 @@ const Question = ({ question, part }: Props) => {
           <span className="text-lg">{question.order}.</span>
           <span className="text-lg">{question.question}</span>
         </label>
-        <div className="mt-2 flex flex-col h-[100px] w-[500px]">
+        <div className="mt-2 flex h-[100px] w-[500px] flex-col">
           <Textarea
             value={response}
             onChange={(e) => {
@@ -90,7 +110,7 @@ const Question = ({ question, part }: Props) => {
               setResponse(e.target.value);
             }}
           />
-          <div className="flex ml-auto">
+          <div className="ml-auto flex">
             <Done id={question.id} checked={question.done} part={part} />
           </div>
         </div>
