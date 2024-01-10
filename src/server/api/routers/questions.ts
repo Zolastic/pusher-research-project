@@ -79,7 +79,7 @@ export const questionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const { id, done, part } = input;
 
-      await pusherServer.trigger(`presence-${part}`, "incoming-message", {
+      await pusherServer.trigger(`presence-${part}`, "update-done", {
         id,
         done,
       });

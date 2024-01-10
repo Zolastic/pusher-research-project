@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Button } from './ui/button'
 import { Check } from 'lucide-react'
 import { api } from "~/trpc/react";
+import { pusherClient } from '~/lib/pusher';
 
 type Props = {
   id: string;
@@ -21,12 +22,21 @@ export default function done({ id, checked, part }: Props) {
         part: part
       })
       .then(() => {
+        console.log("hello")
         setDone(!done)
       })
       .catch((error) => {
         console.error("Error updating marked as done status", error);
       });
   }
+
+  const channel = pusherClient.subscribe(`presence-${part}`);
+  channel.bind("update-done", (data: { id: string, done: boolean }) => {
+    console.log("update-done:", data);
+    if (data.id === id) {
+      setDone(data.done);
+    }
+  });
   
   return (
     <div className="flex ml-auto mt-4">

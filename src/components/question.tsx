@@ -57,27 +57,29 @@ const Question = ({ question, part }: Props) => {
       if (data.id === question.id) {
         setResponse(data.response);
       }
-      const socketId = pusherClient.connection.socket_id;
-      console.log("Socket ID:", socketId);
     });
 
-    // Presence channels also support 'pusher:subscription_succeeded' and 'pusher:member_added' events
-    channel.bind(
-      "pusher:subscription_succeeded",
-      function (members: { count: any; me: any }) {
-        console.log("Successfully subscribed!");
-        console.log("Number of members:", members.count);
-        console.log("Me:", members.me);
-      },
-    );
+    // // Presence channels also support 'pusher:subscription_succeeded' and 'pusher:member_added' events
+    // channel.bind(
+    //   "pusher:subscription_succeeded",
+    //   function (members: { count: any; me: any, each: any }) {
+    //     // console.log("Successfully subscribed!");
+    //     // console.log("Number of members:", members.count);
+    //     // console.log("Me:", members.me);
+    //     console.log("members", members.each)
+    //     members.each(function (member: { id: any; info: any; }) {
+    //       console.log("member", member)
+    //     });
+    //   },
+    // );
 
-    channel.bind("pusher:member_added", function (member: { id: any }) {
-      console.log("Member added:", member.id);
-    });
+    // channel.bind("pusher:member_added", function (member: { id: any }) {
+    //   console.log("Member added:", member.id);
+    // });
 
-    channel.bind("pusher:member_removed", function (member: { id: any }) {
-      console.log("Member removed:", member.id);
-    });
+    // channel.bind("pusher:member_removed", function (member: { id: any }) {
+    //   console.log("Member removed:", member.id);
+    // });
 
     return () => {
       // Unsubscribe from the presence channel when the component is unmounted

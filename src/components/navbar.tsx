@@ -13,7 +13,7 @@ function AuthButton() {
                 <div className="ml-1 mr-3 font-bold">
                     {session?.user?.name} 
                 </div>
-                <Button onClick={() => signOut()}>
+                <Button variant={"link"} className="bg-[#300D4F] text-muted" onClick={() => signOut()}>
                     Sign Out
                 </Button>
             </>
@@ -21,7 +21,7 @@ function AuthButton() {
     } else {
         return (
             <>
-                <Button onClick={() => signIn()}>
+                <Button variant={"link"} className="bg-[#300D4F] text-muted" onClick={() => signIn()}>
                     Sign In
                 </Button>
             </>
@@ -33,7 +33,7 @@ export default function Navbar() {
     return(
         <div className="flex items-center justify-between p-4">
             <Link href={`/`} className="flex items-center">
-                <Button variant={"link"} className="bg-[#300D4F] text-muted">
+                <Button variant={"default"}>
                     Home
                 </Button>
             </Link>

@@ -7,6 +7,7 @@ import { ChevronRight } from "lucide-react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "~/server/auth";
 import { redirect } from "next/navigation";
+import Header from "~/components/header";
 
 const page = async () => {
   const session = await getServerSession(authOptions)
@@ -19,6 +20,7 @@ const page = async () => {
   return (
     <>
       <main className="flex min-h-screen flex-col items-center bg-slate-100 px-4">
+        <Header header="Part 1: Organisational Profile" part="part2" />
         {questions.map((part: any) => (
           <div key={part} className="flex flex-col items-center m-4 bg-slate-200 rounded">
             {part.map((question: Question) => (

@@ -16,6 +16,10 @@ export async function POST(req: Request) {
 
   const data = {
     user_id: session.user.id,
+    user_info: {
+      image: session.user.image,
+      name: session.user.name
+    }
   };
 
   if (!socketId || !channelName) {
